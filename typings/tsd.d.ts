@@ -40,9 +40,19 @@ declare module 'jsep' {
             name: string;
         }
 
-        export interface Literal extends Expression {
-            type: 'Literal';
-            value: boolean | number | string;
+        export interface NumberLiteral extends Expression {
+            type: 'NumberLiteral';
+            value: number;
+            raw: string;
+        }
+        export interface StringLiteral extends Expression {
+            type: 'StringLiteral';
+            value: string;
+            raw: string;
+        }
+        export interface BooleanLiteral extends Expression {
+            type: 'BooleanLiteral';
+            value: boolean;
             raw: string;
         }
 
@@ -71,7 +81,20 @@ declare module 'jsep' {
             prefix: boolean;
         }
 
-        type ExpressionType = 'Compound' | 'Identifier' | 'MemberExpression' | 'Literal' | 'ThisExpression' | 'CallExpression' | 'UnaryExpression' | 'BinaryExpression' | 'LogicalExpression' | 'ConditionalExpression' | 'ArrayExpression';
+        type ExpressionType = 
+            | 'Compound' 
+            | 'Identifier' 
+            | 'MemberExpression' 
+            | 'NumberLiteral' 
+            | 'StringLiteral' 
+            | 'BooleanLiteral' 
+            | 'ThisExpression' 
+            | 'CallExpression' 
+            | 'UnaryExpression' 
+            | 'BinaryExpression' 
+            | 'LogicalExpression' 
+            | 'ConditionalExpression' 
+            | 'ArrayExpression';
 
         function addBinaryOp(operatorName: string, precedence: number): void;
 
@@ -82,6 +105,13 @@ declare module 'jsep' {
         function removeUnaryOp(operatorName: string): void;
 
         const version: string;
+
+        function isLogicalExpression(param: Expression): param is LogicalExpression {
+            return typeof param === 'object' && param.type === 'LogicalExpression';
+        }
+        function isArrayExpression(param: Expression): param is ArrayExpression {
+            return typeof param === 'object' && param.type === 'ArrayExpression';
+        }
     }
 
     function jsep(val: string | jsep.Expression): jsep.Expression;
