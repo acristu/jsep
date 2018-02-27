@@ -557,6 +557,40 @@
 	jsep.version = '<%= version %>';
 	jsep.toString = function() { return 'JavaScript Expression Parser (JSEP) v' + jsep.version; };
 
+	function checkType(type, param) {
+		return param != null && typeof param === 'object' &&  param.type === type;
+	}
+
+	jsep.isCompound					= checkType.bind(null, 'isCompound');
+	jsep.isIdentifier				= checkType.bind(null, 'isIdentifier');
+	jsep.isMemberExpression			= checkType.bind(null, 'isMemberExpression');
+	jsep.isNumberLiteral			= checkType.bind(null, 'isNumberLiteral');
+	jsep.isStringLiteral			= checkType.bind(null, 'isStringLiteral');
+	jsep.isBooleanLiteral			= checkType.bind(null, 'isBooleanLiteral');
+	jsep.isThisExpression			= checkType.bind(null, 'isThisExpression');
+	jsep.isCallExpression			= checkType.bind(null, 'isCallExpression');
+	jsep.isUnaryExpression			= checkType.bind(null, 'isUnaryExpression');
+	jsep.isBinaryExpression			= checkType.bind(null, 'isBinaryExpression');
+	jsep.isLogicalExpression		= checkType.bind(null, 'isLogicalExpression');
+	jsep.isConditionalExpression	= checkType.bind(null, 'isConditionalExpression');
+	jsep.isArrayExpression			= checkType.bind(null, 'isArrayExpression');
+	jsep.isExpression = function (param) {
+		return jsep.isCompound					(param) ||
+			jsep.isIdentifier				(param) ||
+			jsep.isMemberExpression			(param) ||
+			jsep.isNumberLiteral			(param) ||
+			jsep.isStringLiteral			(param) ||
+			jsep.isBooleanLiteral			(param) ||
+			jsep.isThisExpression			(param) ||
+			jsep.isCallExpression			(param) ||
+			jsep.isUnaryExpression			(param) ||
+			jsep.isBinaryExpression			(param) ||
+			jsep.isLogicalExpression		(param) ||
+			jsep.isConditionalExpression	(param) ||
+			jsep.isArrayExpression			(param);
+	};
+
+
 	/**
 	 * @method jsep.addUnaryOp
 	 * @param {string} op_name The name of the unary op to add

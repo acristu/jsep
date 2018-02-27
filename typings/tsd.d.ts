@@ -1,100 +1,131 @@
 declare module 'jsep' {
 
     namespace jsep {
-        export interface Expression {
+        export interface ExpressionBase {
             type: ExpressionType;
+            returnType: any;
         }
 
-        export interface ArrayExpression extends Expression {
-            type: 'ArrayExpression';
+        export interface ArrayExpression extends ExpressionBase {
+            readonly type: 'ArrayExpression';
             elements: Expression[];
         }
 
-        export interface BinaryExpression extends Expression {
-            type: 'BinaryExpression';
+        export interface BinaryExpression extends ExpressionBase {
+            readonly type: 'BinaryExpression';
             operator: string;
             left: Expression;
             right: Expression;
         }
 
-        export interface CallExpression extends Expression {
-            type: 'CallExpression';
+        export interface CallExpression extends ExpressionBase {
+            readonly type: 'CallExpression';
             arguments: Expression[];
             callee: Expression;
         }
 
-        export interface Compound extends Expression {
-            type: 'Compound';
+        export interface Compound extends ExpressionBase {
+            readonly type: 'Compound';
             body: Expression[];
         }
 
-        export interface ConditionalExpression extends Expression {
-            type: 'ConditionalExpression';
+        export interface ConditionalExpression extends ExpressionBase {
+            readonly type: 'ConditionalExpression';
             test: Expression;
             consequent: Expression;
             alternate: Expression;
         }
 
-        export interface Identifier extends Expression {
-            type: 'Identifier';
+        export interface Identifier extends ExpressionBase {
+            readonly type: 'Identifier';
             name: string;
         }
 
-        export interface NumberLiteral extends Expression {
-            type: 'NumberLiteral';
+        export interface NumberLiteral extends ExpressionBase {
+            readonly type: 'NumberLiteral';
             value: number;
             raw: string;
         }
-        export interface StringLiteral extends Expression {
-            type: 'StringLiteral';
+        export interface StringLiteral extends ExpressionBase {
+            readonly type: 'StringLiteral';
             value: string;
             raw: string;
         }
-        export interface BooleanLiteral extends Expression {
-            type: 'BooleanLiteral';
+        export interface BooleanLiteral extends ExpressionBase {
+            readonly type: 'BooleanLiteral';
             value: boolean;
             raw: string;
         }
 
-        export interface LogicalExpression extends Expression {
-            type: 'LogicalExpression';
+        export interface LogicalExpression extends ExpressionBase {
+            readonly type: 'LogicalExpression';
             operator: string;
             left: Expression;
             right: Expression;
         }
 
-        export interface MemberExpression extends Expression {
-            type: 'MemberExpression';
+        export interface MemberExpression extends ExpressionBase {
+            readonly type: 'MemberExpression';
             computed: boolean;
             object: Expression;
             property: Expression;
         }
 
-        export interface ThisExpression extends Expression {
-            type: 'ThisExpression';
+        export interface ThisExpression extends ExpressionBase {
+            readonly type: 'ThisExpression';
         }
 
-        export interface UnaryExpression extends Expression {
-            type: 'UnaryExpression';
+        export interface UnaryExpression extends ExpressionBase {
+            readonly type: 'UnaryExpression';
             operator: string;
             argument: Expression;
             prefix: boolean;
         }
 
-        type ExpressionType = 
-            | 'Compound' 
-            | 'Identifier' 
-            | 'MemberExpression' 
-            | 'NumberLiteral' 
-            | 'StringLiteral' 
-            | 'BooleanLiteral' 
-            | 'ThisExpression' 
-            | 'CallExpression' 
-            | 'UnaryExpression' 
-            | 'BinaryExpression' 
-            | 'LogicalExpression' 
-            | 'ConditionalExpression' 
+        type ExpressionType =
+            | 'Compound'
+            | 'Identifier'
+            | 'MemberExpression'
+            | 'NumberLiteral'
+            | 'StringLiteral'
+            | 'BooleanLiteral'
+            | 'ThisExpression'
+            | 'CallExpression'
+            | 'UnaryExpression'
+            | 'BinaryExpression'
+            | 'LogicalExpression'
+            | 'ConditionalExpression'
             | 'ArrayExpression';
+
+        type Expression =
+            | Compound
+            | Identifier
+            | MemberExpression
+            | NumberLiteral
+            | StringLiteral
+            | BooleanLiteral
+            | ThisExpression
+            | CallExpression
+            | UnaryExpression
+            | BinaryExpression
+            | LogicalExpression
+            | ConditionalExpression
+            | ArrayExpression;
+
+        export function isExpression                (param: any): param is Expression;
+        export function isCompound					(param: any): param is Compound;
+        export function isIdentifier				(param: any): param is Identifier;
+        export function isMemberExpression			(param: any): param is MemberExpression;
+        export function isNumberLiteral			    (param: any): param is NumberLiteral;
+        export function isStringLiteral			    (param: any): param is StringLiteral;
+        export function isBooleanLiteral			(param: any): param is BooleanLiteral;
+        export function isThisExpression			(param: any): param is ThisExpression;
+        export function isCallExpression			(param: any): param is CallExpression;
+        export function isUnaryExpression			(param: any): param is UnaryExpression;
+        export function isBinaryExpression			(param: any): param is BinaryExpression;
+        export function isLogicalExpression		    (param: any): param is LogicalExpression;
+        export function isConditionalExpression	    (param: any): param is ConditionalExpression;
+        export function isArrayExpression			(param: any): param is ArrayExpression;
 
         function addBinaryOp(operatorName: string, precedence: number): void;
 
@@ -105,13 +136,6 @@ declare module 'jsep' {
         function removeUnaryOp(operatorName: string): void;
 
         const version: string;
-
-        function isLogicalExpression(param: Expression): param is LogicalExpression {
-            return typeof param === 'object' && param.type === 'LogicalExpression';
-        }
-        function isArrayExpression(param: Expression): param is ArrayExpression {
-            return typeof param === 'object' && param.type === 'ArrayExpression';
-        }
     }
 
     function jsep(val: string | jsep.Expression): jsep.Expression;
