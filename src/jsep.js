@@ -13,6 +13,8 @@
 	var COMPOUND = 'Compound',
 		IDENTIFIER = 'Identifier',
 		MEMBER_EXP = 'MemberExpression',
+		NUMBER_LITERAL = 'NumberLiteral',
+		STRING_LITERAL = 'StringLiteral',
 		LITERAL = 'Literal',
 		THIS_EXP = 'ThisExpression',
 		CALL_EXP = 'CallExpression',
@@ -328,7 +330,7 @@
 					}
 
 					return {
-						type: LITERAL,
+						type: NUMBER_LITERAL,
 						value: parseFloat(number),
 						raw: number
 					};
@@ -366,7 +368,7 @@
 					}
 
 					return {
-						type: LITERAL,
+						type: STRING_LITERAL,
 						value: str,
 						raw: quote + str + quote
 					};
@@ -561,26 +563,26 @@
 		return param != null && typeof param === 'object' &&  param.type === type;
 	}
 
-	jsep.isCompound					= checkType.bind(null, 'isCompound');
-	jsep.isIdentifier				= checkType.bind(null, 'isIdentifier');
-	jsep.isMemberExpression			= checkType.bind(null, 'isMemberExpression');
-	jsep.isNumberLiteral			= checkType.bind(null, 'isNumberLiteral');
-	jsep.isStringLiteral			= checkType.bind(null, 'isStringLiteral');
-	jsep.isBooleanLiteral			= checkType.bind(null, 'isBooleanLiteral');
-	jsep.isThisExpression			= checkType.bind(null, 'isThisExpression');
-	jsep.isCallExpression			= checkType.bind(null, 'isCallExpression');
-	jsep.isUnaryExpression			= checkType.bind(null, 'isUnaryExpression');
-	jsep.isBinaryExpression			= checkType.bind(null, 'isBinaryExpression');
-	jsep.isLogicalExpression		= checkType.bind(null, 'isLogicalExpression');
-	jsep.isConditionalExpression	= checkType.bind(null, 'isConditionalExpression');
-	jsep.isArrayExpression			= checkType.bind(null, 'isArrayExpression');
+	jsep.isCompound					= checkType.bind(null, 'Compound');
+	jsep.isIdentifier				= checkType.bind(null, 'Identifier');
+	jsep.isMemberExpression			= checkType.bind(null, 'MemberExpression');
+	jsep.isNumberLiteral			= checkType.bind(null, 'NumberLiteral');
+	jsep.isStringLiteral			= checkType.bind(null, 'StringLiteral');
+	jsep.isLiteral					= checkType.bind(null, 'Literal');
+	jsep.isThisExpression			= checkType.bind(null, 'ThisExpression');
+	jsep.isCallExpression			= checkType.bind(null, 'CallExpression');
+	jsep.isUnaryExpression			= checkType.bind(null, 'UnaryExpression');
+	jsep.isBinaryExpression			= checkType.bind(null, 'BinaryExpression');
+	jsep.isLogicalExpression		= checkType.bind(null, 'LogicalExpression');
+	jsep.isConditionalExpression	= checkType.bind(null, 'ConditionalExpression');
+	jsep.isArrayExpression			= checkType.bind(null, 'ArrayExpression');
 	jsep.isExpression = function (param) {
 		return jsep.isCompound					(param) ||
 			jsep.isIdentifier				(param) ||
 			jsep.isMemberExpression			(param) ||
 			jsep.isNumberLiteral			(param) ||
 			jsep.isStringLiteral			(param) ||
-			jsep.isBooleanLiteral			(param) ||
+			jsep.isLiteral					(param) ||
 			jsep.isThisExpression			(param) ||
 			jsep.isCallExpression			(param) ||
 			jsep.isUnaryExpression			(param) ||

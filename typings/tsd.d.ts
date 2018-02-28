@@ -51,8 +51,8 @@ declare module 'jsep' {
             value: string;
             raw: string;
         }
-        export interface BooleanLiteral extends ExpressionBase {
-            readonly type: 'BooleanLiteral';
+        export interface Literal extends ExpressionBase {
+            readonly type: 'Literal';
             value: boolean;
             raw: string;
         }
@@ -88,7 +88,7 @@ declare module 'jsep' {
             | 'MemberExpression'
             | 'NumberLiteral'
             | 'StringLiteral'
-            | 'BooleanLiteral'
+            | 'Literal'
             | 'ThisExpression'
             | 'CallExpression'
             | 'UnaryExpression'
@@ -103,7 +103,7 @@ declare module 'jsep' {
             | MemberExpression
             | NumberLiteral
             | StringLiteral
-            | BooleanLiteral
+            | Literal
             | ThisExpression
             | CallExpression
             | UnaryExpression
@@ -118,7 +118,7 @@ declare module 'jsep' {
         export function isMemberExpression			(param: any): param is MemberExpression;
         export function isNumberLiteral			    (param: any): param is NumberLiteral;
         export function isStringLiteral			    (param: any): param is StringLiteral;
-        export function isBooleanLiteral			(param: any): param is BooleanLiteral;
+        export function isLiteral       			(param: any): param is Literal;
         export function isThisExpression			(param: any): param is ThisExpression;
         export function isCallExpression			(param: any): param is CallExpression;
         export function isUnaryExpression			(param: any): param is UnaryExpression;
