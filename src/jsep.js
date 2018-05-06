@@ -90,10 +90,13 @@
 		},
 	// Utility function (gets called from multiple places)
 	// Also note that `a && b` and `a || b` are *logical* expressions, not binary expressions
-		createBinaryExpression = function (operator, left, right) {
+		createBinaryExpression = function (startIndex, index, expr, operator, left, right) {
 			var type = (operator === '||' || operator === '&&') ? LOGICAL_EXP : BINARY_EXP;
 			return {
 				type: type,
+				startIndex: startIndex,
+				endIndex: index,
+				expr: expr.substring(startIndex, index),
 				operator: operator,
 				left: left,
 				right: right
@@ -132,6 +135,7 @@
 
 				// Push `index` up to the next non-space character
 				gobbleSpaces = function() {
+					var startIndex = index;
 					var ch = exprICode(index);
 					// space or tab
 					while(ch === 32 || ch === 9 || ch === 10 || ch === 13) {
@@ -141,6 +145,7 @@
 
 				// The main parsing function. Much of this code is dedicated to ternary expressions
 				gobbleExpression = function() {
+					var startIndex = index;
 					var test = gobbleBinaryExpression(),
 						consequent, alternate;
 					gobbleSpaces();
@@ -160,6 +165,9 @@
 							}
 							return {
 								type: CONDITIONAL_EXP,
+								startIndex: startIndex,
+								endIndex: index,
+								expr: expr.substring(startIndex, index),
 								test: test,
 								consequent: consequent,
 								alternate: alternate
@@ -177,6 +185,7 @@
 				// and move down from 3 to 2 to 1 character until a matching binary operation is found
 				// then, return that binary operation
 				gobbleBinaryOp = function() {
+					var startIndex = index;
 					gobbleSpaces();
 					var biop, to_check = expr.substr(index, max_binop_len), tc_len = to_check.length;
 					while(tc_len > 0) {
@@ -192,6 +201,7 @@
 				// This function is responsible for gobbling an individual expression,
 				// e.g. `1`, `1+2`, `a+(b*2)-Math.sqrt(2)`
 				gobbleBinaryExpression = function() {
+					var startIndex = index;
 					var ch_i, node, biop, prec, stack, biop_info, left, right, i;
 
 					// First, try to get the leftmost thing
@@ -228,7 +238,7 @@
 							right = stack.pop();
 							biop = stack.pop().value;
 							left = stack.pop();
-							node = createBinaryExpression(biop, left, right);
+							node = createBinaryExpression(startIndex, index, expr, biop, left, right);
 							stack.push(node);
 						}
 
@@ -242,7 +252,7 @@
 					i = stack.length - 1;
 					node = stack[i];
 					while(i > 1) {
-						node = createBinaryExpression(stack[i - 1].value, stack[i - 2], node);
+						node = createBinaryExpression(startIndex, index, expr, stack[i - 1].value, stack[i - 2], node);
 						i -= 2;
 					}
 					return node;
@@ -251,6 +261,7 @@
 				// An individual part of a binary expression:
 				// e.g. `foo.bar(baz)`, `1`, `"abc"`, `(a % 2)` (because it's in parenthesis)
 				gobbleToken = function() {
+					var startIndex = index;
 					var ch, to_check, tc_len;
 
 					gobbleSpaces();
@@ -272,6 +283,9 @@
 								index += tc_len;
 								return {
 									type: UNARY_EXP,
+									startIndex: startIndex,
+									endIndex: index,
+									expr: expr.substring(startIndex, index),
 									operator: to_check,
 									argument: gobbleToken(),
 									prefix: true
@@ -291,6 +305,7 @@
 				// Parse simple numeric literals: `12`, `3.4`, `.5`. Do this by using a string to
 				// keep track of everything in the numeric literal and then calling `parseFloat` on that string
 				gobbleNumericLiteral = function() {
+					var startIndex = index;
 					var number = '', ch, chCode;
 					while(isDecimalDigit(exprICode(index))) {
 						number += exprI(index++);
@@ -331,6 +346,9 @@
 
 					return {
 						type: NUMBER_LITERAL,
+						startIndex: startIndex,
+						endIndex: index,
+						expr: expr.substring(startIndex, index),
 						value: parseFloat(number),
 						raw: number
 					};
@@ -339,6 +357,7 @@
 				// Parses a string literal, staring with single or double quotes with basic support for escape codes
 				// e.g. `"hello world"`, `'this is\nJSEP'`
 				gobbleStringLiteral = function() {
+					var startIndex = index;
 					var str = '', quote = exprI(index++), closed = false, ch;
 
 					while(index < length) {
@@ -369,6 +388,9 @@
 
 					return {
 						type: STRING_LITERAL,
+						startIndex: startIndex,
+						endIndex: index,
+						expr: expr.substring(startIndex, index),
 						value: str,
 						raw: quote + str + quote
 					};
@@ -379,6 +401,7 @@
 				// Also, this function checks if that identifier is a literal:
 				// (e.g. `true`, `false`, `null`) or `this`
 				gobbleIdentifier = function() {
+					var startIndex = index;
 					var ch = exprICode(index), start = index, identifier;
 
 					if(isIdentifierStart(ch)) {
@@ -400,6 +423,9 @@
 					if(literals.hasOwnProperty(identifier)) {
 						return {
 							type: LITERAL,
+							startIndex: startIndex,
+							endIndex: index,
+							expr: expr.substring(startIndex, index),
 							value: literals[identifier],
 							raw: identifier
 						};
@@ -408,6 +434,9 @@
 					} else {
 						return {
 							type: IDENTIFIER,
+							startIndex: startIndex,
+							endIndex: index,
+							expr: expr.substring(startIndex, index),
 							name: identifier
 						};
 					}
@@ -419,6 +448,7 @@
 				// until the terminator character `)` or `]` is encountered.
 				// e.g. `foo(bar, baz)`, `my_func()`, or `[bar, baz]`
 				gobbleArguments = function(termination) {
+					var startIndex = index;
 					var ch_i, args = [], node, closed = false;
 					while(index < length) {
 						gobbleSpaces();
@@ -448,6 +478,7 @@
 				// It also gobbles function calls:
 				// e.g. `Math.acos(obj.angle)`
 				gobbleVariable = function() {
+					var startIndex = index;
 					var ch_i, node;
 					ch_i = exprICode(index);
 
@@ -501,6 +532,7 @@
 				// that the next thing it should see is the close parenthesis. If not,
 				// then the expression probably doesn't have a `)`
 				gobbleGroup = function() {
+					var startIndex = index;
 					index++;
 					var node = gobbleExpression();
 					gobbleSpaces();
@@ -516,9 +548,13 @@
 				// This function assumes that it needs to gobble the opening bracket
 				// and then tries to gobble the expressions as arguments.
 				gobbleArray = function() {
+					var startIndex = index;
 					index++;
 					return {
 						type: ARRAY_EXP,
+						startIndex: startIndex,
+						endIndex: index,
+						expr: expr.substring(startIndex, index),
 						elements: gobbleArguments(CBRACK_CODE)
 					};
 				},
@@ -550,6 +586,9 @@
 			} else {
 				return {
 					type: COMPOUND,
+					startIndex: 0,
+					endIndex: index,
+					expr: expr,
 					body: nodes
 				};
 			}

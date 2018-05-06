@@ -22,7 +22,7 @@ var do_eval = function(node) {
 };
 
 var test_op_expession = function(str) {
-	equal(do_eval(jsep(str)), eval(str));
+	equal(do_eval(cleanup_literals(jsep(str))), eval(str));
 };
 
 var filter_props = function(larger, smaller) {
@@ -42,13 +42,36 @@ var filter_props = function(larger, smaller) {
 var parse = jsep;
 var test_parser = function(inp, out) {
 	var parse_val = parse(inp);
-	return deepEqual(filter_props(parse_val, out), out);
+	return deepEqual(cleanup_literals(filter_props(parse_val, out)), out);
 };
 var esprima_comparison_test = function(str) {
 	var jsep_val = jsep(str),
 		esprima_val = esprima.parse(str);
-	return deepEqual(jsep_val, esprima_val.body[0].expression);
+	return deepEqual(cleanup_literals(cleanup_debug_fields(jsep_val)), esprima_val.body[0].expression);
 };
+function cleanup_debug_fields(jsep_val) {
+	if (jsep_val.startIndex != null) delete jsep_val.startIndex;
+	if (jsep_val.endIndex != null) delete jsep_val.endIndex;
+	if (jsep_val.expr != null) delete jsep_val.expr;
+	for(var prop_name in jsep_val) {
+		prop_val  = jsep_val[prop_name];
+		if (typeof prop_val === 'object') {
+			jsep_val[prop_name] = cleanup_debug_fields(prop_val);
+		}
+	}
+	return jsep_val;
+}
+function cleanup_literals(jsep_val) {
+	if (jsep_val.type === 'NumberLiteral') jsep_val.type = 'Literal';
+	if (jsep_val.type === 'StringLiteral') jsep_val.type = 'Literal';
+	for(var prop_name in jsep_val) {
+		prop_val  = jsep_val[prop_name];
+		if (typeof prop_val === 'object') {
+			jsep_val[prop_name] = cleanup_literals(prop_val);
+		}
+	}
+	return jsep_val;
+}
 
 module("Expression Parser");
 
