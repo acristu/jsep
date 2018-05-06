@@ -495,17 +495,23 @@
 							gobbleSpaces();
 							node = {
 								type: MEMBER_EXP,
+								startIndex: startIndex,
 								computed: false,
 								object: node,
 								property: gobbleIdentifier()
 							};
+							node.endIndex = index;
+							node.expr = expr.substring(startIndex, index);
 						} else if(ch_i === OBRACK_CODE) {
 							node = {
 								type: MEMBER_EXP,
+								startIndex: startIndex,
 								computed: true,
 								object: node,
 								property: gobbleExpression()
 							};
+							node.endIndex = index;
+							node.expr = expr.substring(startIndex, index);
 							gobbleSpaces();
 							ch_i = exprICode(index);
 							if(ch_i !== CBRACK_CODE) {
@@ -516,9 +522,12 @@
 							// A function call is being made; gobble all the arguments
 							node = {
 								type: CALL_EXP,
+								startIndex: startIndex,
 								'arguments': gobbleArguments(CPAREN_CODE),
 								callee: node
 							};
+							node.endIndex = index;
+							node.expr = expr.substring(startIndex, index);
 						}
 						gobbleSpaces();
 						ch_i = exprICode(index);
