@@ -4,6 +4,9 @@ declare module 'jsep' {
         export interface ExpressionBase {
             type: ExpressionType;
             returnType: any;
+            startIndex: number;
+            endIndex: number;
+            expr: string;
         }
 
         export interface ArrayExpression extends ExpressionBase {
