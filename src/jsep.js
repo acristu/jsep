@@ -510,13 +510,13 @@
 								object: node,
 								property: gobbleExpression()
 							};
-							node.endIndex = index;
-							node.expr = expr.substring(startIndex, index);
 							gobbleSpaces();
 							ch_i = exprICode(index);
 							if(ch_i !== CBRACK_CODE) {
 								throwError('Unclosed [', index);
 							}
+							node.endIndex = index;
+							node.expr = expr.substring(startIndex, index);
 							index++;
 						} else if(ch_i === OPAREN_CODE) {
 							// A function call is being made; gobble all the arguments
