@@ -6,7 +6,7 @@ declare module 'jsep' {
             returnType: any;
             startIndex: number;
             endIndex: number;
-            expr: string;
+            origExpr: string;
         }
 
         export interface ArrayExpression extends ExpressionBase {

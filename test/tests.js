@@ -52,7 +52,7 @@ var esprima_comparison_test = function(str) {
 function cleanup_debug_fields(jsep_val) {
 	if (jsep_val.startIndex != null) delete jsep_val.startIndex;
 	if (jsep_val.endIndex != null) delete jsep_val.endIndex;
-	if (jsep_val.expr != null) delete jsep_val.expr;
+	if (jsep_val.origExpr != null) delete jsep_val.origExpr;
 	for(var prop_name in jsep_val) {
 		prop_val  = jsep_val[prop_name];
 		if (typeof prop_val === 'object') {
@@ -202,6 +202,18 @@ test('Ternary', function() {
 	equal(val.type, 'ConditionalExpression');
 	val = jsep('a||b ? c : d');
 	equal(val.type, 'ConditionalExpression');
+});
+
+test('origExpr/startIndex/endIndex', function () {
+	var parsed_expr = jsep('12 + func(a) - func2(b)');
+	equal(parsed_expr.left.type, "BinaryExpression", "origExpr for BinaryExpression");
+	equal(parsed_expr.left.origExpr, "12 + func(a)", "origExpr for BinaryExpression");
+
+	var parsed_expr = jsep("12 + X['abc123()[]!'] - Y['!@#$%^&*()as_']");
+	equal(parsed_expr.left.type, "BinaryExpression");
+	equal(parsed_expr.left.origExpr, "12 + X['abc123()[]!']");
+	equal(parsed_expr.left.right.type, "MemberExpression");
+	equal(parsed_expr.left.right.origExpr, "X['abc123()[]!']", "origExpr for MemberExpression with string literal property");
 });
 
 }());

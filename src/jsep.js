@@ -92,11 +92,21 @@
 	// Also note that `a && b` and `a || b` are *logical* expressions, not binary expressions
 		createBinaryExpression = function (startIndex, index, expr, operator, left, right) {
 			var type = (operator === '||' || operator === '&&') ? LOGICAL_EXP : BINARY_EXP;
+			
+			{
+				//TODO: study a better way to handle the following quick-and-dirty fix
+				if (binary_ops[left.origExpr.slice(-1)] != null) {
+					left.origExpr = left.origExpr.replace(/\s*.$/, '');
+				} else if (binary_ops[left.origExpr.slice(-2)] != null) {
+					left.origExpr = left.origExpr.replace(/\s*..$/, '');
+				}
+			} 
+
 			return {
 				type: type,
 				startIndex: startIndex,
 				endIndex: index,
-				expr: expr.substring(startIndex, index),
+				origExpr: expr.substring(startIndex, index),
 				operator: operator,
 				left: left,
 				right: right
@@ -167,7 +177,7 @@
 								type: CONDITIONAL_EXP,
 								startIndex: startIndex,
 								endIndex: index,
-								expr: expr.substring(startIndex, index),
+								origExpr: expr.substring(startIndex, index),
 								test: test,
 								consequent: consequent,
 								alternate: alternate
@@ -285,7 +295,7 @@
 									type: UNARY_EXP,
 									startIndex: startIndex,
 									endIndex: index,
-									expr: expr.substring(startIndex, index),
+									origExpr: expr.substring(startIndex, index),
 									operator: to_check,
 									argument: gobbleToken(),
 									prefix: true
@@ -348,7 +358,7 @@
 						type: NUMBER_LITERAL,
 						startIndex: startIndex,
 						endIndex: index,
-						expr: expr.substring(startIndex, index),
+						origExpr: expr.substring(startIndex, index),
 						value: parseFloat(number),
 						raw: number
 					};
@@ -390,7 +400,7 @@
 						type: STRING_LITERAL,
 						startIndex: startIndex,
 						endIndex: index,
-						expr: expr.substring(startIndex, index),
+						origExpr: expr.substring(startIndex, index),
 						value: str,
 						raw: quote + str + quote
 					};
@@ -425,7 +435,7 @@
 							type: LITERAL,
 							startIndex: startIndex,
 							endIndex: index,
-							expr: expr.substring(startIndex, index),
+							origExpr: expr.substring(startIndex, index),
 							value: literals[identifier],
 							raw: identifier
 						};
@@ -436,7 +446,7 @@
 							type: IDENTIFIER,
 							startIndex: startIndex,
 							endIndex: index,
-							expr: expr.substring(startIndex, index),
+							origExpr: expr.substring(startIndex, index),
 							name: identifier
 						};
 					}
@@ -501,7 +511,7 @@
 								property: gobbleIdentifier()
 							};
 							node.endIndex = index;
-							node.expr = expr.substring(startIndex, index);
+							node.origExpr = expr.substring(startIndex, index);
 						} else if(ch_i === OBRACK_CODE) {
 							node = {
 								type: MEMBER_EXP,
@@ -515,9 +525,9 @@
 							if(ch_i !== CBRACK_CODE) {
 								throwError('Unclosed [', index);
 							}
-							node.endIndex = index;
-							node.expr = expr.substring(startIndex, index);
 							index++;
+							node.endIndex = index;
+							node.origExpr = expr.substring(startIndex, index);
 						} else if(ch_i === OPAREN_CODE) {
 							// A function call is being made; gobble all the arguments
 							node = {
@@ -527,7 +537,7 @@
 								callee: node
 							};
 							node.endIndex = index;
-							node.expr = expr.substring(startIndex, index);
+							node.origExpr = expr.substring(startIndex, index);
 						}
 						gobbleSpaces();
 						ch_i = exprICode(index);
@@ -563,7 +573,7 @@
 						type: ARRAY_EXP,
 						startIndex: startIndex,
 						endIndex: index,
-						expr: expr.substring(startIndex, index),
+						origExpr: expr.substring(startIndex, index),
 						elements: gobbleArguments(CBRACK_CODE)
 					};
 				},
@@ -597,7 +607,7 @@
 					type: COMPOUND,
 					startIndex: 0,
 					endIndex: index,
-					expr: expr,
+					origExpr: expr,
 					body: nodes
 				};
 			}
