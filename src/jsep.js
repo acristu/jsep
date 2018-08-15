@@ -95,9 +95,9 @@
 			
 			{
 				//TODO: study a better way to handle the following quick-and-dirty fix
-				if (binary_ops[left.origExpr.slice(-1)] != null) {
+				if (left.origExpr && binary_ops[left.origExpr.slice(-1)] != null) {
 					left.origExpr = left.origExpr.replace(/\s*.$/, '');
-				} else if (binary_ops[left.origExpr.slice(-2)] != null) {
+				} else if (left.origExpr && binary_ops[left.origExpr.slice(-2)] != null) {
 					left.origExpr = left.origExpr.replace(/\s*..$/, '');
 				}
 			} 
