@@ -106,7 +106,7 @@
 				type: type,
 				startIndex: startIndex,
 				endIndex: index,
-				origExpr: expr.substring(startIndex, index),
+				origExpr: expr.slice(startIndex, index).join(''),
 				operator: operator,
 				left: left,
 				right: right
@@ -133,14 +133,14 @@
 		// Parsing
 		// -------
 		// `expr` is a string with the passed in expression
-		jsep = function(expr) {
+		jsep = function(inputExpr, forceParseIncompleteExpr) {
+			var expr = inputExpr.split('');
 			// `index` stores the character number we are currently at while `length` is a constant
 			// All of the gobbles below will modify `index` as we move along
 			var index = 0,
-				charAtFunc = expr.charAt,
-				charCodeAtFunc = expr.charCodeAt,
-				exprI = function(i) { return charAtFunc.call(expr, i); },
-				exprICode = function(i) { return charCodeAtFunc.call(expr, i); },
+				exprI = function(i) { return expr[i]; },
+				exprICode = function(i) { if (expr[i]) return expr[i].charCodeAt(0); else return NaN; },
+				pushChars = function(str) { expr.push.apply(expr, str.split('')); },
 				length = expr.length,
 
 				// Push `index` up to the next non-space character
@@ -164,26 +164,32 @@
 						index++;
 						consequent = gobbleExpression();
 						if(!consequent) {
-							throwError('Expected expression', index);
+							if (forceParseIncompleteExpr) {
+								pushChars('consequent : alternate');
+							} else throwError('Expected expression', index);
 						}
 						gobbleSpaces();
 						if(exprICode(index) === COLON_CODE) {
 							index++;
 							alternate = gobbleExpression();
 							if(!alternate) {
-								throwError('Expected expression', index);
+								if (forceParseIncompleteExpr) {
+									pushChars('alternate');
+								} else throwError('Expected expression', index);
 							}
 							return {
 								type: CONDITIONAL_EXP,
 								startIndex: startIndex,
 								endIndex: index,
-								origExpr: expr.substring(startIndex, index),
+								origExpr: expr.slice(startIndex, index).join(''),
 								test: test,
 								consequent: consequent,
 								alternate: alternate
 							};
 						} else {
-							throwError('Expected :', index);
+							if (forceParseIncompleteExpr) {
+								pushChars(' : alternate');
+							} else throwError(' :', index);
 						}
 					} else {
 						return test;
@@ -197,7 +203,7 @@
 				gobbleBinaryOp = function() {
 					var startIndex = index;
 					gobbleSpaces();
-					var biop, to_check = expr.substr(index, max_binop_len), tc_len = to_check.length;
+					var biop, to_check = expr.slice(index, index + max_binop_len).join(''), tc_len = to_check.length;
 					while(tc_len > 0) {
 						if(binary_ops.hasOwnProperty(to_check)) {
 							index += tc_len;
@@ -230,7 +236,9 @@
 
 					right = gobbleToken();
 					if(!right) {
-						throwError("Expected expression after " + biop, index);
+						if (forceParseIncompleteExpr) {
+							pushChars(' x');
+						} else throwError("Expected expression after " + biop, index);
 					}
 					stack = [left, biop_info, right];
 
@@ -254,7 +262,9 @@
 
 						node = gobbleToken();
 						if(!node) {
-							throwError("Expected expression after " + biop, index);
+							if (forceParseIncompleteExpr) {
+								pushChars(' x');
+							} else throwError("Expected expression after " + biop, index);
 						}
 						stack.push(biop_info, node);
 					}
@@ -286,7 +296,7 @@
 					} else if (ch === OBRACK_CODE) {
 						return gobbleArray();
 					} else {
-						to_check = expr.substr(index, max_unop_len);
+						to_check = expr.slice(index, index + max_unop_len).join('');
 						tc_len = to_check.length;
 						while(tc_len > 0) {
 							if(unary_ops.hasOwnProperty(to_check)) {
@@ -295,7 +305,7 @@
 									type: UNARY_EXP,
 									startIndex: startIndex,
 									endIndex: index,
-									origExpr: expr.substring(startIndex, index),
+									origExpr: expr.slice(startIndex, index).join(''),
 									operator: to_check,
 									argument: gobbleToken(),
 									prefix: true
@@ -358,7 +368,7 @@
 						type: NUMBER_LITERAL,
 						startIndex: startIndex,
 						endIndex: index,
-						origExpr: expr.substring(startIndex, index),
+						origExpr: expr.slice(startIndex, index).join(''),
 						value: parseFloat(number),
 						raw: number
 					};
@@ -400,7 +410,7 @@
 						type: STRING_LITERAL,
 						startIndex: startIndex,
 						endIndex: index,
-						origExpr: expr.substring(startIndex, index),
+						origExpr: expr.slice(startIndex, index).join(''),
 						value: str,
 						raw: quote + str + quote
 					};
@@ -428,14 +438,14 @@
 							break;
 						}
 					}
-					identifier = expr.slice(start, index);
+					identifier = expr.slice(start, index).join('');
 
 					if(literals.hasOwnProperty(identifier)) {
 						return {
 							type: LITERAL,
 							startIndex: startIndex,
 							endIndex: index,
-							origExpr: expr.substring(startIndex, index),
+							origExpr: expr.slice(startIndex, index).join(''),
 							value: literals[identifier],
 							raw: identifier
 						};
@@ -446,7 +456,7 @@
 							type: IDENTIFIER,
 							startIndex: startIndex,
 							endIndex: index,
-							origExpr: expr.substring(startIndex, index),
+							origExpr: expr.slice(startIndex, index).join(''),
 							name: identifier
 						};
 					}
@@ -458,7 +468,6 @@
 				// until the terminator character `)` or `]` is encountered.
 				// e.g. `foo(bar, baz)`, `my_func()`, or `[bar, baz]`
 				gobbleArguments = function(termination) {
-					var startIndex = index;
 					var ch_i, args = [], node, closed = false;
 					while(index < length) {
 						gobbleSpaces();
@@ -478,7 +487,10 @@
 						}
 					}
 					if (!closed) {
-						throwError('Expected ' + String.fromCharCode(termination), index);
+						if (forceParseIncompleteExpr) {
+							pushChars(String.fromCharCode(termination));
+							index += 2;
+						} else throwError('Expected ' + String.fromCharCode(termination), index);
 					}
 					return args;
 				},
@@ -511,7 +523,7 @@
 								property: gobbleIdentifier()
 							};
 							node.endIndex = index;
-							node.origExpr = expr.substring(startIndex, index);
+							node.origExpr = expr.slice(startIndex, index).join('');
 						} else if(ch_i === OBRACK_CODE) {
 							node = {
 								type: MEMBER_EXP,
@@ -527,7 +539,7 @@
 							}
 							index++;
 							node.endIndex = index;
-							node.origExpr = expr.substring(startIndex, index);
+							node.origExpr = expr.slice(startIndex, index).join('');
 						} else if(ch_i === OPAREN_CODE) {
 							// A function call is being made; gobble all the arguments
 							node = {
@@ -537,7 +549,7 @@
 								callee: node
 							};
 							node.endIndex = index;
-							node.origExpr = expr.substring(startIndex, index);
+							node.origExpr = expr.slice(startIndex, index).join('');
 						}
 						gobbleSpaces();
 						ch_i = exprICode(index);
@@ -569,13 +581,14 @@
 				gobbleArray = function() {
 					var startIndex = index;
 					index++;
-					return {
+					var node = {
 						type: ARRAY_EXP,
 						startIndex: startIndex,
-						endIndex: index,
-						origExpr: expr.substring(startIndex, index),
 						elements: gobbleArguments(CBRACK_CODE)
 					};
+					node.endIndex = index;
+					node.origExpr = expr.slice(startIndex, index).join('');
+					return node;
 				},
 
 				nodes = [], ch_i, node;

@@ -141,7 +141,7 @@ declare module 'jsep' {
         const version: string;
     }
 
-    function jsep(val: string | jsep.Expression): jsep.Expression;
+    function jsep(val: string | jsep.Expression, forceParseIncompleteExpr?: boolean): jsep.Expression;
 
     export = jsep;
 }

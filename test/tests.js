@@ -216,4 +216,18 @@ test('origExpr/startIndex/endIndex', function () {
 	equal(parsed_expr.left.right.origExpr, "X['abc123()[]!']", "origExpr for MemberExpression with string literal property");
 });
 
+test('forceParseIncompleteExpr', function () {
+	var parsed_expr = jsep('SUM(1', true);
+	equal(parsed_expr.type, "CallExpression");
+	equal(parsed_expr.origExpr, "SUM(1)");
+	var parsed_expr = jsep('a + ', true);
+	equal(parsed_expr.type, "BinaryExpression");
+	var parsed_expr = jsep('f(1) + g(', true);
+	equal(parsed_expr.type, "BinaryExpression");
+	equal(parsed_expr.origExpr, "f(1) + g()");
+	var parsed_expr = jsep('[a, b', true);
+	equal(parsed_expr.type, "ArrayExpression");
+	equal(parsed_expr.origExpr, "[a, b]");
+});
+
 }());
