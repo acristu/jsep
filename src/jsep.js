@@ -301,15 +301,16 @@
 						while(tc_len > 0) {
 							if(unary_ops.hasOwnProperty(to_check)) {
 								index += tc_len;
-								return {
+								var node = {
 									type: UNARY_EXP,
 									startIndex: startIndex,
-									endIndex: index,
-									origExpr: expr.slice(startIndex, index).join(''),
 									operator: to_check,
 									argument: gobbleToken(),
 									prefix: true
 								};
+								node.endIndex = index;
+								node.origExpr = expr.slice(startIndex, index).join('');
+								return node;
 							}
 							to_check = to_check.substr(0, --tc_len);
 						}
