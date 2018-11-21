@@ -205,17 +205,18 @@ test('Ternary', function() {
 });
 
 test('origExpr/startIndex/endIndex', function () {
+	jsep.addLiteral('@', '@');
+
 	var parsed_expr = jsep('12 + func(a) - func2(b)');
 	equal(parsed_expr.left.type, "BinaryExpression", "origExpr for BinaryExpression");
 	equal(parsed_expr.left.origExpr, "12 + func(a)", "origExpr for BinaryExpression");
 	
-	jsep.addUnaryOp("@");
 	var parsed_expr = jsep('[FLOOR(@[idx]/4) * 4, @[idx]]');
 	equal(parsed_expr.type, "ArrayExpression", "origExpr type for ArrayExpression");
 	equal(parsed_expr.origExpr, "[FLOOR(@[idx]/4) * 4, @[idx]]");
 
 	var parsed_expr = jsep('@[name]');
-	equal(parsed_expr.type, "UnaryExpression", "origExpr type for UnaryExpression");
+	equal(parsed_expr.type, "MemberExpression", "origExpr type for UnaryExpression");
 	equal(parsed_expr.origExpr, "@[name]");
 
 	var parsed_expr = jsep("12 + X['abc123()[]!'] - Y['!@#$%^&*()as_']");

@@ -138,6 +138,10 @@ declare module 'jsep' {
 
         function removeUnaryOp(operatorName: string): void;
 
+        function addLiteral(literal_name: string, literal_value: string);
+
+        function removeLiteral(literal_name: string);
+
         const version: string;
     }
 
