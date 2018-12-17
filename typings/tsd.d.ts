@@ -42,6 +42,7 @@ declare module 'jsep' {
         export interface Identifier extends ExpressionBase {
             readonly type: 'Identifier';
             name: string;
+            parent?: string;
         }
 
         export interface NumberLiteral extends ExpressionBase {
