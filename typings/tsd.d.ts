@@ -1,6 +1,4 @@
-declare module 'jsep' {
-
-    namespace jsep {
+    declare namespace jsep {
         export interface ExpressionBase {
             type: ExpressionType;
             returnType: any;
@@ -149,4 +147,4 @@ declare module 'jsep' {
     }
 
     export = jsep;
-}
+
