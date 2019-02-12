@@ -36,8 +36,8 @@
 		SEMCOL_CODE = 59, // ;
 		COLON_CODE  = 58, // :
 
-		throwError = function(message, index) {
-			var error = new Error(message + ' at character ' + index);
+		throwError = function(message, index, inputExpr) {
+			var error = new Error(message + ' at character ' + index + '; for expr ' + inputExpr);
 			error.index = index;
 			error.description = message;
 			throw error;
@@ -167,7 +167,7 @@
 						if(!consequent) {
 							if (forceParseIncompleteExpr) {
 								pushChars('consequent : alternate');
-							} else throwError('Expected expression', index);
+							} else throwError('Expected expression', index, inputExpr);
 						}
 						gobbleSpaces();
 						if(exprICode(index) === COLON_CODE) {
@@ -176,7 +176,7 @@
 							if(!alternate) {
 								if (forceParseIncompleteExpr) {
 									pushChars('alternate');
-								} else throwError('Expected expression', index);
+								} else throwError('Expected expression', index, inputExpr);
 							}
 							return {
 								type: CONDITIONAL_EXP,
@@ -190,7 +190,7 @@
 						} else {
 							if (forceParseIncompleteExpr) {
 								pushChars(' : alternate');
-							} else throwError(' :', index);
+							} else throwError(' :', index, inputExpr);
 						}
 					} else {
 						return test;
@@ -239,7 +239,7 @@
 					if(!right) {
 						if (forceParseIncompleteExpr) {
 							pushChars(' x');
-						} else throwError("Expected expression after " + biop, index);
+						} else throwError("Expected expression after " + biop, index, inputExpr);
 					}
 					stack = [left, biop_info, right];
 
@@ -265,7 +265,7 @@
 						if(!node) {
 							if (forceParseIncompleteExpr) {
 								pushChars(' x');
-							} else throwError("Expected expression after " + biop, index);
+							} else throwError("Expected expression after " + biop, index, inputExpr);
 						}
 						stack.push(biop_info, node);
 					}
@@ -352,7 +352,7 @@
 							number += exprI(index++);
 						}
 						if(!isDecimalDigit(exprICode(index-1)) ) {
-							throwError('Expected exponent (' + number + exprI(index) + ')', index);
+							throwError('Expected exponent (' + number + exprI(index) + ')', index, inputExpr);
 						}
 					}
 
@@ -361,9 +361,9 @@
 					// Check to make sure this isn't a variable name that start with a number (123abc)
 					if(isIdentifierStart(chCode)) {
 						throwError('Variable names cannot start with a number (' +
-									number + exprI(index) + ')', index);
+									number + exprI(index) + ')', index, inputExpr);
 					} else if(chCode === PERIOD_CODE) {
-						throwError('Unexpected period', index);
+						throwError('Unexpected period', index, inputExpr);
 					}
 
 					return {
@@ -405,7 +405,7 @@
 					}
 
 					if(!closed) {
-						throwError('Unclosed quote after "'+str+'"', index);
+						throwError('Unclosed quote after "'+str+'"', index, inputExpr);
 					}
 
 					return {
@@ -429,7 +429,7 @@
 					if(isIdentifierStart(ch)) {
 						index++;
 					} else {
-						throwError('Unexpected ' + exprI(index), index);
+						throwError('Unexpected ' + exprI(index), index, inputExpr);
 					}
 
 					while(index < length) {
@@ -483,7 +483,7 @@
 						} else {
 							node = gobbleExpression();
 							if(!node || node.type === COMPOUND) {
-								throwError('Expected comma', index);
+								throwError('Expected comma', index, inputExpr);
 							}
 							args.push(node);
 						}
@@ -492,7 +492,7 @@
 						if (forceParseIncompleteExpr) {
 							pushChars(String.fromCharCode(termination));
 							index += 2;
-						} else throwError('Expected ' + String.fromCharCode(termination), index);
+						} else throwError('Expected ' + String.fromCharCode(termination), index, inputExpr);
 					}
 					return args;
 				},
@@ -537,7 +537,7 @@
 							gobbleSpaces();
 							ch_i = exprICode(index);
 							if(ch_i !== CBRACK_CODE) {
-								throwError('Unclosed [', index);
+								throwError('Unclosed [', index, inputExpr);
 							}
 							index++;
 							node.endIndex = index;
@@ -573,7 +573,7 @@
 						index++;
 						return node;
 					} else {
-						throwError('Unclosed (', index);
+						throwError('Unclosed (', index, inputExpr);
 					}
 				},
 
@@ -609,7 +609,7 @@
 					// If we weren't able to find a binary expression and are out of room, then
 					// the expression passed in probably has too much
 					} else if(index < length) {
-						throwError('Unexpected "' + exprI(index) + '"', index);
+						throwError('Unexpected "' + exprI(index) + '"', index, inputExpr);
 					}
 				}
 			}
@@ -766,6 +766,8 @@
 
 		return this;
 	};
+
+	jsep.parse = jsep;
 
 	// In desktop environments, have a way to restore the old value for `jsep`
 	if (typeof exports === 'undefined') {

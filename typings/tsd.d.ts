@@ -144,9 +144,9 @@ declare module 'jsep' {
         function removeLiteral(literal_name: string);
 
         const version: string;
-    }
 
-    function jsep(val: string | jsep.Expression, forceParseIncompleteExpr?: boolean): jsep.Expression;
+        function parse(val: string | Expression, forceParseIncompleteExpr?: boolean): Expression;
+    }
 
     export = jsep;
 }
