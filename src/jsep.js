@@ -141,7 +141,10 @@
 			var index = 0,
 				exprI = function(i) { return expr[i]; },
 				exprICode = function(i) { if (expr[i]) return expr[i].charCodeAt(0); else return NaN; },
-				pushChars = function(str) { expr.push.apply(expr, str.split('')); },
+				pushChars = function(str) { 
+					expr.push.apply(expr, str.split('')); 
+					length = expr.length;
+				},
 				length = expr.length,
 
 				// Push `index` up to the next non-space character
