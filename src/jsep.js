@@ -167,6 +167,7 @@
 						if(!consequent) {
 							if (forceParseIncompleteExpr) {
 								pushChars('consequent : alternate');
+								consequent = gobbleExpression();
 							} else throwError('Expected expression', index, inputExpr);
 						}
 						gobbleSpaces();
@@ -176,6 +177,7 @@
 							if(!alternate) {
 								if (forceParseIncompleteExpr) {
 									pushChars('alternate');
+									alternate = gobbleExpression();
 								} else throwError('Expected expression', index, inputExpr);
 							}
 							return {
@@ -238,7 +240,8 @@
 					right = gobbleToken();
 					if(!right) {
 						if (forceParseIncompleteExpr) {
-							pushChars(' x');
+							pushChars(' Expression_Expected');
+							right = gobbleToken();
 						} else throwError("Expected expression after " + biop, index, inputExpr);
 					}
 					stack = [left, biop_info, right];
@@ -264,7 +267,8 @@
 						node = gobbleToken();
 						if(!node) {
 							if (forceParseIncompleteExpr) {
-								pushChars(' x');
+								pushChars(' Expression_Expected');
+								node = gobbleToken();
 							} else throwError("Expected expression after " + biop, index, inputExpr);
 						}
 						stack.push(biop_info, node);
