@@ -240,4 +240,13 @@ test('forceParseIncompleteExpr', function () {
 	equal(parsed_expr.origExpr, "[a, b]");
 });
 
+test('parent', function () {
+	var parsed_expr = jsep('1+2');
+	equal(parsed_expr.left.parent, parsed_expr);
+	equal(parsed_expr.right.parent, parsed_expr);
+	var parsed_expr = jsep('1 || 2');
+	equal(parsed_expr.left.parent, parsed_expr);
+	equal(parsed_expr.right.parent, parsed_expr);
+});
+
 }());

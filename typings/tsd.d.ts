@@ -5,6 +5,7 @@
             startIndex: number;
             endIndex: number;
             origExpr: string;
+            parent: Expression;
         }
 
         export interface ArrayExpression extends ExpressionBase {
@@ -40,7 +41,7 @@
         export interface Identifier extends ExpressionBase {
             readonly type: 'Identifier';
             name: string;
-            parent?: string;
+            belongsTo?: string;
         }
 
         export interface NumberLiteral extends ExpressionBase {

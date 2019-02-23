@@ -100,9 +100,9 @@
 				} else if (left.origExpr && binary_ops[left.origExpr.slice(-2)] != null) {
 					left.origExpr = left.origExpr.replace(/\s*..$/, '');
 				}
-			} 
+			}
 
-			return {
+			var binaryExpr = {
 				type: type,
 				startIndex: startIndex,
 				endIndex: index,
@@ -111,6 +111,10 @@
 				left: left,
 				right: right
 			};
+			binaryExpr.left.parent = binaryExpr;
+			binaryExpr.right.parent = binaryExpr;
+
+			return binaryExpr;
 		},
 		// `ch` is a character code in the next three functions
 		isDecimalDigit = function(ch) {
@@ -316,6 +320,7 @@
 									argument: gobbleToken(),
 									prefix: true
 								};
+								node.argument.parent = node;
 								node.endIndex = index;
 								node.origExpr = expr.slice(startIndex, index).join('');
 								return node;
@@ -531,6 +536,7 @@
 								object: node,
 								property: gobbleIdentifier()
 							};
+							node.object.parent = node;
 							node.endIndex = index;
 							node.origExpr = expr.slice(startIndex, index).join('');
 						} else if(ch_i === OBRACK_CODE) {
