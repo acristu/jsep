@@ -238,6 +238,9 @@ test('forceParseIncompleteExpr', function () {
 	var parsed_expr = jsep('[a, b', true);
 	equal(parsed_expr.type, "ArrayExpression");
 	equal(parsed_expr.origExpr, "[a, b]");
+	var parsed_expr = jsep('FUNC(A.', true);
+	equal(parsed_expr.type, "CallExpression");
+	equal(parsed_expr.origExpr, "FUNC(A.identifier_expected)");
 });
 
 }());

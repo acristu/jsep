@@ -436,7 +436,10 @@
 					if(isIdentifierStart(ch)) {
 						index++;
 					} else {
-						throwError('Unexpected ' + exprI(index), index, inputExpr);
+						if (forceParseIncompleteExpr) {
+							pushChars('identifier_expected');
+							index++;
+						} else throwError('Unexpected ' + exprI(index), index, inputExpr);
 					}
 
 					while(index < length) {
